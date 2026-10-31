@@ -1,0 +1,6 @@
+__pycache__/
+logs/
+logs/out
+out*/
+*.zip
+.DS_Store

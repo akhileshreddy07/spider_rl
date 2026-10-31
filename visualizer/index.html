@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIDER-SENSE ARENA // Autonomous Combat Simulation</title>
+  <meta name="description" content="Cinematic Spider-Man-inspired competitive battle simulator and replay engine for Buckshot Roulette autonomous RL agents.">
+  
+  <!-- Premium Gaming & Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       BACKGROUND: NEW YORK CITY AT NIGHT, AMBIENT LIGHTS & CORNER WEBS
+       ======================================================================== -->
+  <div class="ambient-sky-background" aria-hidden="true">
+    <!-- Red & Blue Ambient Spotlights -->
+    <div class="ambient-glow glow-blue-top-right"></div>
+    <div class="ambient-glow glow-red-bottom-left"></div>
+    <div class="ambient-spotlight-arena"></div>
+
+    <!-- Atmospheric Floating Particles -->
+    <div class="particle-field">
+      <div class="particle p1"></div>
+      <div class="particle p2"></div>
+      <div class="particle p3"></div>
+      <div class="particle p4"></div>
+      <div class="particle p5"></div>
+      <div class="particle p6"></div>
+      <div class="particle p7"></div>
+      <div class="particle p8"></div>
+      <div class="particle p9"></div>
+      <div class="particle p10"></div>
+      <div class="particle p11"></div>
+      <div class="particle p12"></div>
+      <div class="particle p13"></div>
+      <div class="particle p14"></div>
+      <div class="particle p15"></div>
+    </div>
+
+    <!-- Top-Left Large Spider Web SVG -->
+    <svg class="corner-web web-top-left" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 0 L320 0 M0 0 L0 320 M0 0 L300 120 M0 0 L240 240 M0 0 L120 300" stroke="#F3263E" stroke-opacity="0.2" stroke-width="1.2"/>
+      <path d="M0 60 Q30 65 60 0 M0 120 Q65 130 120 0 M0 180 Q100 200 180 0 M0 240 Q140 270 240 0 M0 300 Q180 340 300 0" stroke="#F3263E" stroke-opacity="0.18" stroke-width="1"/>
+      <path d="M30 30 Q70 70 120 30 M60 60 Q130 130 200 60 M90 90 Q180 180 270 90" stroke="#168BFF" stroke-opacity="0.12" stroke-width="0.8"/>
+    </svg>
+
+    <!-- Top-Right Large Spider Web SVG -->
+    <svg class="corner-web web-top-right" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M320 0 L0 0 M320 0 L320 320 M320 0 L20 120 M320 0 L80 240 M320 0 L200 300" stroke="#168BFF" stroke-opacity="0.22" stroke-width="1.2"/>
+      <path d="M320 60 Q290 65 260 0 M320 120 Q255 130 200 0 M320 180 Q220 200 140 0 M320 240 Q180 270 80 0 M320 300 Q140 340 20 0" stroke="#168BFF" stroke-opacity="0.18" stroke-width="1"/>
+    </svg>
+
+    <!-- Bottom-Left Faint Spider Web SVG -->
+    <svg class="corner-web web-bottom-left" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 280 L280 280 M0 280 L0 0 M0 280 L260 160 M0 280 L180 60 M0 280 L100 0" stroke="#F3263E" stroke-opacity="0.15" stroke-width="1"/>
+      <path d="M0 220 Q30 215 60 280 M0 160 Q65 150 120 280 M0 100 Q100 80 180 280 M0 40 Q140 10 240 280" stroke="#F3263E" stroke-opacity="0.12" stroke-width="0.8"/>
+    </svg>
+
+    <!-- Bottom-Right Faint Spider Web SVG -->
+    <svg class="corner-web web-bottom-right" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M280 280 L0 280 M280 280 L280 0 M280 280 L20 160 M280 280 L100 60 M280 280 L180 0" stroke="#168BFF" stroke-opacity="0.15" stroke-width="1"/>
+    </svg>
+
+    <!-- NYC Skyline Silhouette Layer -->
+    <div class="nyc-skyline-layer">
+      <svg class="skyline-svg" viewBox="0 0 1600 320" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="skylineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0c1324" stop-opacity="0.85"/>
+            <stop offset="60%" stop-color="#070b18" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#050811" stop-opacity="1"/>
+          </linearGradient>
+          <linearGradient id="spireGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#168BFF" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#168BFF" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Back Distant Layer of Highrises -->
+        <path d="M0 320 L0 180 L40 180 L40 160 L70 160 L70 200 L110 200 L110 140 L125 140 L125 80 L130 80 L130 140 L150 140 L150 190 L210 190 L210 170 L250 170 L250 210 L300 210 L300 130 L320 130 L320 100 L325 100 L325 50 L328 50 L328 100 L340 100 L340 150 L380 150 L380 190 L420 190 L420 160 L470 160 L470 200 L530 200 L530 120 L550 120 L550 70 L553 70 L553 40 L556 40 L556 70 L570 70 L570 140 L620 140 L620 180 L670 180 L670 150 L710 150 L710 190 L760 190 L760 110 L780 110 L780 60 L785 60 L785 30 L788 30 L788 60 L800 60 L800 130 L850 130 L850 170 L910 170 L910 140 L960 140 L960 190 L1010 190 L1010 120 L1030 120 L1035 70 L1038 70 L1038 45 L1041 45 L1041 70 L1060 70 L1060 150 L1110 150 L1110 180 L1170 180 L1170 130 L1210 130 L1210 170 L1270 170 L1270 110 L1290 110 L1295 65 L1298 65 L1298 35 L1302 35 L1302 65 L1320 65 L1320 140 L1370 140 L1370 190 L1430 190 L1430 160 L1480 160 L1480 200 L1530 200 L1530 150 L1570 150 L1570 180 L1600 180 L1600 320 Z" fill="url(#skylineGrad)"/>
+        
+        <!-- Glowing Window Matrix Lights -->
+        <!-- Chrysler Spire Needle Light -->
+        <circle cx="326" cy="50" r="3" fill="#F3263E" class="beacon-pulse"/>
+        <line x1="326" y1="50" x2="326" y2="100" stroke="#168BFF" stroke-width="1.5" stroke-opacity="0.6"/>
+        
+        <!-- One WTC Center Needle Light -->
+        <circle cx="786" cy="30" r="3.5" fill="#F3263E" class="beacon-pulse"/>
+        <line x1="786" y1="30" x2="786" y2="60" stroke="#168BFF" stroke-width="1.8" stroke-opacity="0.8"/>
+        
+        <!-- Empire State Needle Light -->
+        <circle cx="1299" cy="35" r="3" fill="#F3263E" class="beacon-pulse"/>
+        <line x1="1299" y1="35" x2="1299" y2="65" stroke="#168BFF" stroke-width="1.5" stroke-opacity="0.6"/>
+
+        <!-- Window Grid Clusters (Yellow / Cyan) -->
+        <rect x="135" y="150" width="10" height="25" fill="#facc15" fill-opacity="0.25"/>
+        <rect x="220" y="180" width="20" height="20" fill="#38bdf8" fill-opacity="0.2"/>
+        <rect x="308" y="135" width="24" height="40" fill="#facc15" fill-opacity="0.25"/>
+        <rect x="430" y="170" width="30" height="25" fill="#38bdf8" fill-opacity="0.2"/>
+        <rect x="540" y="90" width="22" height="40" fill="#facc15" fill-opacity="0.3"/>
+        <rect x="680" y="160" width="20" height="25" fill="#38bdf8" fill-opacity="0.25"/>
+        <rect x="770" y="80" width="22" height="50" fill="#38bdf8" fill-opacity="0.3"/>
+        <rect x="860" y="140" width="35" height="25" fill="#facc15" fill-opacity="0.2"/>
+        <rect x="1020" y="140" width="30" height="40" fill="#38bdf8" fill-opacity="0.25"/>
+        <rect x="1120" y="160" width="40" height="15" fill="#facc15" fill-opacity="0.2"/>
+        <rect x="1280" y="85" width="30" height="45" fill="#38bdf8" fill-opacity="0.3"/>
+        <rect x="1440" y="170" width="30" height="25" fill="#facc15" fill-opacity="0.2"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       1. TOP BATTLE HEADER (PREMIUM AAA GAMING INTERFACE)
+       ======================================================================== -->
+  <header class="battle-header">
+    <div class="brand-title-wrap">
+      <!-- Original Geometric Spider Crest Emblem -->
+      <div class="brand-icon-shield" id="brandLogo">
+        <svg class="brand-spider-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,2 34,10 34,26 18,34 2,26 2,10" stroke="#F3263E" stroke-width="1.5" fill="#101729"/>
+          <!-- Spider Body & Eyes -->
+          <ellipse cx="18" cy="18" rx="4" ry="5.5" fill="#F3263E"/>
+          <circle cx="18" cy="11.5" r="3" fill="#F3263E"/>
+          <!-- Glowing White Angular Spider Eyes -->
+          <path d="M16 10.5 L17.5 12 L16.2 12.5 Z" fill="#F4F7FF"/>
+          <path d="M20 10.5 L18.5 12 L19.8 12.5 Z" fill="#F4F7FF"/>
+          <!-- Sharp Web-Strand Legs (Left) -->
+          <path d="M15 15 L8 12 L4 16 M15 18 L6 19 L3 24 M15 21 L8 24 L5 29 M16 23 L11 28 L9 32" stroke="#168BFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Sharp Web-Strand Legs (Right) -->
+          <path d="M21 15 L28 12 L32 16 M21 18 L30 19 L33 24 M21 21 L28 24 L31 29 M20 23 L25 28 L27 32" stroke="#168BFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      
+      <div class="brand-text">
+        <h1 class="brand-name">SPIDER-SENSE ARENA</h1>
+        <span class="brand-sub">AUTONOMOUS COMBAT SIMULATION</span>
+      </div>
+    </div>
+
+    <!-- Match Status Center Telemetry -->
+    <div class="match-status-center">
+      <div class="turn-pill" id="turnPill">TURN 1</div>
+      
+      <div class="status-badge running" id="matchStateBadge">
+        <span class="state-dot">●</span>
+        <span id="matchStateText">WAITING</span>
+      </div>
+
+      <div class="match-info-pill" id="matchMetaPill">
+        <span class="meta-label">MATCH:</span> <span class="meta-val" id="matchIdLabel">-</span>
+        <span class="meta-divider">//</span>
+        <span class="meta-label">SEED:</span> <span class="meta-val" id="matchSeedLabel">-</span>
+      </div>
+    </div>
+
+    <!-- Header Action Controls (High-Tech Menu Buttons) -->
+    <div class="header-btn-group">
+      <button class="btn btn-hud-blue" id="btnOpenLibrary" title="Browse historical tournament replays">
+        <span class="btn-icon">📁</span>
+        <span class="btn-text">REPLAYS</span>
+      </button>
+      <button class="btn btn-hud-red" id="btnOpenSim" title="Start a fresh match with the official simulator">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text">NEW BATTLE</span>
+      </button>
+      <button class="btn btn-hud-glass" id="btnFilePicker" title="Load custom simulator .jsonl log">
+        <span class="btn-icon">📂</span>
+        <span class="btn-text">LOAD LOG</span>
+      </button>
+      <input type="file" id="fileInput" accept=".jsonl,.json,.txt" style="display: none;">
+      <button class="btn btn-hud-glass" id="soundToggleBtn" title="Toggle battle audio">
+        <span class="btn-icon">🔊</span>
+        <span class="btn-text">SFX</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. MAIN BATTLE SCREEN (CINEMATIC ARENA + FUTURISTIC COMBAT LOG)
+       ======================================================================== -->
+  <main class="battle-screen">
+
+    <!-- LEFT / CENTER: THE CINEMATIC BATTLE STAGE -->
+    <section class="battle-stage-container" id="battleStage">
+
+      <!-- Holographic Arena Boundary Floor Grid -->
+      <div class="arena-floor-graphic">
+        <div class="arena-floor-inner"></div>
+        <div class="arena-crosshairs-v"></div>
+        <div class="arena-crosshairs-h"></div>
+      </div>
+
+      <!-- OPPONENT COMBAT ZONE (Top-Right of Stage) -->
+      <div class="combat-zone opponent-side" id="opponentSideContainer">
+        
+        <!-- Opponent Status Card (HUD Component) -->
+        <div class="showdown-status-box is-opponent" id="oppStatusBox-1">
+          <div class="hud-card-corner top-left"></div>
+          <div class="hud-card-corner bottom-right"></div>
+          
+          <div class="status-box-header">
+            <div class="bot-title-area">
+              <span class="bot-faction-icon">⚔️</span>
+              <span class="bot-name" id="oppName-1">random_bot</span>
+              <span class="bot-tag foe">OPPONENT</span>
+            </div>
+            <span class="status-condition-badge alive" id="oppCondition-1">ALIVE</span>
+          </div>
+
+          <!-- Prominent Health Display -->
+          <div class="hp-section">
+            <div class="hp-headline-row">
+              <span class="hp-label">SHIELD INTEGRITY</span>
+              <span class="hp-digital-number" id="oppHpText-1">5 / 5 (100%)</span>
+            </div>
+            
+            <div class="hp-track">
+              <div class="hp-fill" id="oppHpFill-1" style="width: 100%;"></div>
+            </div>
+
+            <div class="hp-pips-row" id="oppHpPips-1">
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+            </div>
+          </div>
+
+          <!-- Tactical Equipment / Upgrades Row -->
+          <div class="items-row" id="oppItemsRow-1">
+            <div class="item-badge" title="Juice (+1 Heal)">
+              <span class="item-icon">🧃</span>
+              <span class="item-name">JUICE</span>
+              <b class="item-count" id="oppJuice-1">0</b>
+            </div>
+            <div class="item-badge" title="Coffee (Eject Shell)">
+              <span class="item-icon">☕</span>
+              <span class="item-name">COFFEE</span>
+              <b class="item-count" id="oppCoffee-1">0</b>
+            </div>
+            <div class="item-badge" title="Magnifying Glass (Inspect Shell)">
+              <span class="item-icon">🔍</span>
+              <span class="item-name">MAG</span>
+              <b class="item-count" id="oppMag-1">0</b>
+            </div>
+            <div class="item-badge" title="Pool Floatie (Turn Skip)">
+              <span class="item-icon">🛟</span>
+              <span class="item-name">FLOAT</span>
+              <b class="item-count" id="oppFloatie-1">0</b>
+            </div>
+            <div class="item-badge" title="Hand Saw (+1 Damage Boost)">
+              <span class="item-icon">🪚</span>
+              <span class="item-name">SAW</span>
+              <b class="item-count" id="oppSaw-1">0</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opponent Combat Platform & Original Avatar -->
+        <div class="avatar-platform-wrap" id="oppAvatarWrap-1">
+          <div class="combat-platform-base foe-platform">
+            <div class="platform-ring outer"></div>
+            <div class="platform-ring inner"></div>
+          </div>
+          
+          <!-- Original Sleek Cyber-Villain / Rogue Combat Android SVG Avatar -->
+          <svg class="bot-avatar-sprite idle-float" id="oppAvatarSvg-1" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="oppMetalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#334155"/>
+                <stop offset="50%" stop-color="#1E293B"/>
+                <stop offset="100%" stop-color="#0F172A"/>
+              </linearGradient>
+              <linearGradient id="oppCyanGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="100%" stop-color="#168BFF"/>
+              </linearGradient>
+              <filter id="cyanNeon" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+              </filter>
+            </defs>
+
+            <!-- Shadow -->
+            <ellipse cx="60" cy="122" rx="35" ry="7" fill="#000000" fill-opacity="0.65"/>
+
+            <!-- Combat Android Pauldrons / Shoulders -->
+            <path d="M22 46 L38 38 L44 56 L24 62 Z" fill="#1E293B" stroke="#475569" stroke-width="1.5"/>
+            <path d="M98 46 L82 38 L76 56 L96 62 Z" fill="#1E293B" stroke="#475569" stroke-width="1.5"/>
+            <circle cx="26" cy="52" r="3" fill="#168BFF"/>
+            <circle cx="94" cy="52" r="3" fill="#168BFF"/>
+
+            <!-- Heavy Armored Torso -->
+            <path d="M38 38 L82 38 L78 84 L42 84 Z" fill="url(#oppMetalGrad)" stroke="#475569" stroke-width="1.8"/>
+            <!-- Cybernetic Energy Reactor Core -->
+            <polygon points="60,48 70,58 60,68 50,58" fill="#070B18" stroke="#168BFF" stroke-width="1.5"/>
+            <circle cx="60" cy="58" r="4.5" fill="url(#oppCyanGlow)" filter="url(#cyanNeon)"/>
+
+            <!-- Cybernetic Chest Conduit Webbing -->
+            <path d="M50 58 L40 68 M70 58 L80 68 M60 68 L60 82" stroke="#168BFF" stroke-width="1.2" stroke-opacity="0.7"/>
+
+            <!-- Helmet / Chassis Head -->
+            <path d="M42 16 L78 16 L84 38 L36 38 Z" fill="url(#oppMetalGrad)" stroke="#64748B" stroke-width="1.5"/>
+            <!-- Menacing Electric-Blue Glowing Visor Scanner -->
+            <polygon points="44,24 76,24 72,32 48,32" fill="#070B18" stroke="#38BDF8" stroke-width="1.2"/>
+            <line x1="46" y1="28" x2="74" y2="28" stroke="#38BDF8" stroke-width="3" filter="url(#cyanNeon)"/>
+            <circle cx="68" cy="28" r="2" fill="#FFFFFF"/>
+
+            <!-- Dual Threat Sensor Antennae -->
+            <line x1="44" y1="16" x2="38" y2="6" stroke="#64748B" stroke-width="2"/>
+            <circle cx="38" cy="5" r="2.5" fill="#F3263E"/>
+            <line x1="76" y1="16" x2="82" y2="6" stroke="#64748B" stroke-width="2"/>
+            <circle cx="82" cy="5" r="2.5" fill="#168BFF"/>
+
+            <!-- Combat Forearms & Weapon Claw -->
+            <rect x="18" y="60" width="10" height="28" rx="3" fill="#1E293B" stroke="#475569" stroke-width="1.2"/>
+            <polygon points="18,88 28,88 23,98" fill="#38BDF8"/>
+            <rect x="92" y="60" width="10" height="28" rx="3" fill="#1E293B" stroke="#475569" stroke-width="1.2"/>
+            <polygon points="92,88 102,88 97,98" fill="#38BDF8"/>
+
+            <!-- Thruster Legs & Hover Jets -->
+            <rect x="42" y="84" width="15" height="24" rx="2" fill="#0F172A" stroke="#334155" stroke-width="1.2"/>
+            <rect x="63" y="84" width="15" height="24" rx="2" fill="#0F172A" stroke="#334155" stroke-width="1.2"/>
+            <!-- Dual Jet Thruster Flames -->
+            <polygon points="44,108 55,108 49.5,122" fill="#168BFF" filter="url(#cyanNeon)"/>
+            <polygon points="65,108 76,108 70.5,122" fill="#168BFF" filter="url(#cyanNeon)"/>
+          </svg>
+          
+          <div class="combat-popup-text" id="oppPopup-1" style="display: none;"></div>
+        </div>
+
+      </div>
+
+      <!-- CENTER DUEL ARENA: VS BADGE, SHOTGUN & SPIDER-SENSE PROBABILITY RADAR -->
+      <div class="center-duel-stage" id="centerDuelStage">
+        
+        <!-- Cinematic Glowing "VS" Indicator Badge -->
+        <div class="duel-vs-badge" id="duelVsBadge">
+          <div class="vs-glow-line left"></div>
+          <div class="vs-emblem">
+            <span class="vs-text">VS</span>
+          </div>
+          <div class="vs-glow-line right"></div>
+        </div>
+
+        <!-- Tactical Combat Shotgun Illustration -->
+        <div class="duel-shotgun-container" id="duelShotgunWrap">
+          <svg class="shotgun-svg" viewBox="0 0 260 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gunSteel" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#64748b"/>
+                <stop offset="40%" stop-color="#334155"/>
+                <stop offset="100%" stop-color="#0f172a"/>
+              </linearGradient>
+              <linearGradient id="gunGrip" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4a151b"/>
+                <stop offset="100%" stop-color="#1e080b"/>
+              </linearGradient>
+            </defs>
+            
+            <!-- Shadow -->
+            <ellipse cx="130" cy="58" rx="90" ry="6" fill="#000" fill-opacity="0.5"/>
+
+            <!-- Wooden / Carbon Stock -->
+            <path d="M10 46 L60 40 L76 26 L50 20 L8 36 Z" fill="url(#gunGrip)" stroke="#8E1024" stroke-width="1.8"/>
+            <path d="M22 30 L45 36" stroke="#F3263E" stroke-opacity="0.4" stroke-width="1.2"/>
+            
+            <!-- Steel Receiver & Ejection Port -->
+            <rect x="74" y="18" width="65" height="24" rx="3" fill="url(#gunSteel)" stroke="#1e293b" stroke-width="2"/>
+            <rect x="92" y="22" width="22" height="9" rx="1.5" fill="#090d16" stroke="#64748b" stroke-width="1"/>
+            <circle cx="125" cy="30" r="3" fill="#F3263E"/>
+
+            <!-- Trigger Guard & Trigger -->
+            <path d="M72 40 Q80 48 90 40" stroke="#475569" stroke-width="2.5" fill="none"/>
+            <path d="M80 41 L84 45" stroke="#94a3b8" stroke-width="2"/>
+
+            <!-- Heavy Ribbed Forend Pump -->
+            <rect x="135" y="24" width="50" height="17" rx="3" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+            <line x1="145" y1="24" x2="145" y2="41" stroke="#475569" stroke-width="1.5"/>
+            <line x1="155" y1="24" x2="155" y2="41" stroke="#475569" stroke-width="1.5"/>
+            <line x1="165" y1="24" x2="165" y2="41" stroke="#475569" stroke-width="1.5"/>
+            <line x1="175" y1="24" x2="175" y2="41" stroke="#475569" stroke-width="1.5"/>
+
+            <!-- Twin Heavy Steel Barrels -->
+            <rect x="138" y="19" width="112" height="12" fill="url(#gunSteel)" stroke="#475569" stroke-width="1.5"/>
+            <!-- Muzzle Crown -->
+            <rect x="248" y="18" width="5" height="14" rx="1" fill="#94a3b8" stroke="#1e293b" stroke-width="1"/>
+            <!-- Front Bead Sight -->
+            <circle cx="246" cy="18" r="2" fill="#F3263E"/>
+          </svg>
+          <div class="duel-muzzle-flash" id="duelMuzzleFlash"></div>
+        </div>
+
+        <!-- Chamber Shell Magazine Info Card -->
+        <div class="chamber-ammo-card">
+          <div class="ammo-rack-title">MAGAZINE:</div>
+          <div class="ammo-rack-row" id="ammoRackRow">
+            <!-- Dynamically populated high-tech shell chips -->
+          </div>
+          <div class="ammo-readout">
+            <span class="readout-label">REMAINING:</span> <b class="readout-total" id="ammoRemainingVal">0</b>
+            <span class="readout-split">(<span id="ammoLiveVal" class="val-live">0L</span> / <span id="ammoBlankVal" class="val-blank">0B</span>)</span>
+          </div>
+        </div>
+
+        <!-- Spider-Sense Bayesian Radar Gauge -->
+        <div class="spider-sense-radar-pill" id="spiderRadarPill">
+          <div class="radar-spider-icon">🕷️</div>
+          <span class="radar-label">SPIDER-SENSE:</span>
+          <div class="radar-odds-bar">
+            <div class="radar-odds-fill-live" id="radarOddsFill" style="width: 50%;"></div>
+          </div>
+          <span class="radar-pct-text">
+            <span class="live" id="radarLivePct">50% LIVE</span>
+            <span class="pct-div">/</span>
+            <span class="blank" id="radarBlankPct">50% BLANK</span>
+          </span>
+        </div>
+
+        <!-- Upgrade Market Draft Tray (During PICK_UPGRADE stage) -->
+        <div class="market-draft-tray" id="marketDraftTray" style="display: none;">
+          <span class="market-draft-title">🎁 AVAILABLE DRAFT POOL:</span>
+          <div class="market-draft-badges" id="marketDraftBadges"></div>
+        </div>
+
+      </div>
+
+      <!-- PLAYER COMBAT ZONE (Bottom-Left of Stage: Spider-Sense) -->
+      <div class="combat-zone player-side" id="playerSideContainer">
+        
+        <!-- Spider-Sense Combat Platform & Hero Avatar -->
+        <div class="avatar-platform-wrap" id="playerAvatarWrap">
+          <div class="combat-platform-base hero-platform">
+            <div class="platform-ring outer"></div>
+            <div class="platform-ring inner"></div>
+          </div>
+          
+          <!-- Original Sleek Red & Blue Spider-Hero SVG Avatar -->
+          <svg class="bot-avatar-sprite idle-float" id="playerAvatarSvg" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="heroRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F3263E"/>
+                <stop offset="60%" stop-color="#D91D34"/>
+                <stop offset="100%" stop-color="#8E1024"/>
+              </linearGradient>
+              <linearGradient id="heroBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#168BFF"/>
+                <stop offset="100%" stop-color="#0B4B96"/>
+              </linearGradient>
+              <filter id="spiderEyeGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+              </filter>
+            </defs>
+
+            <!-- Shadow -->
+            <ellipse cx="60" cy="122" rx="35" ry="7" fill="#000000" fill-opacity="0.65"/>
+
+            <!-- Crouched Legs (Athletic Battle Stance) -->
+            <!-- Left Leg -->
+            <path d="M46 84 L30 102 L42 116" stroke="url(#heroBlueGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M34 108 L44 116" stroke="url(#heroRedGrad)" stroke-width="7" stroke-linecap="round"/>
+            <!-- Right Leg -->
+            <path d="M74 84 L90 102 L78 116" stroke="url(#heroBlueGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M86 108 L76 116" stroke="url(#heroRedGrad)" stroke-width="7" stroke-linecap="round"/>
+
+            <!-- Muscular Torso: Iconic Red Center & Blue Flank Panels -->
+            <path d="M36 44 Q60 36 84 44 L78 86 Q60 90 42 86 Z" fill="url(#heroRedGrad)" stroke="#8E1024" stroke-width="1.8"/>
+            <!-- Electric-Blue Rib & Lats Armor Flanks -->
+            <path d="M36 48 L44 50 L46 84 L40 84 Z" fill="url(#heroBlueGrad)"/>
+            <path d="M84 48 L76 50 L74 84 L80 84 Z" fill="url(#heroBlueGrad)"/>
+
+            <!-- Intricate Geometric Webbing on Chest -->
+            <path d="M60 40 L60 88 M44 54 L76 54 M42 66 L78 66 M44 78 L76 78" stroke="#8E1024" stroke-width="1.2" stroke-opacity="0.8"/>
+            <ellipse cx="60" cy="62" rx="12" ry="14" fill="none" stroke="#8E1024" stroke-width="1" stroke-opacity="0.8"/>
+
+            <!-- Chest Spider Insignia -->
+            <polygon points="60,54 56,62 60,68 64,62" fill="#070B18"/>
+            <!-- 8 Angular Spider Legs Extending on Chest -->
+            <path d="M57 58 L48 52 M63 58 L72 52 M57 62 L46 66 M63 62 L74 66 M58 66 L50 74 M62 66 L70 74 M59 68 L53 77 M61 68 L67 77" stroke="#070B18" stroke-width="1.5" stroke-linecap="round"/>
+
+            <!-- Mask / Head -->
+            <ellipse cx="60" cy="24" rx="18" ry="20" fill="url(#heroRedGrad)" stroke="#8E1024" stroke-width="1.8"/>
+            <!-- Mask Web Grid -->
+            <path d="M60 4 L60 44 M42 24 L78 24" stroke="#8E1024" stroke-width="1"/>
+            <ellipse cx="60" cy="24" rx="10" ry="11" fill="none" stroke="#8E1024" stroke-width="0.9"/>
+
+            <!-- Iconic Expressive White Angular Spider Eyes with Jet-Black Outlines -->
+            <path d="M48 20 Q55 21 56 27 Q51 28 45 23 Z" fill="#F4F7FF" stroke="#070B18" stroke-width="2.2" filter="url(#spiderEyeGlow)"/>
+            <path d="M72 20 Q65 21 64 27 Q69 28 75 23 Z" fill="#F4F7FF" stroke="#070B18" stroke-width="2.2" filter="url(#spiderEyeGlow)"/>
+
+            <!-- Combat Stance Arms & Clenched Fists -->
+            <!-- Left Arm -->
+            <path d="M36 46 L22 58 L28 70" stroke="url(#heroRedGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 58 L28 70" stroke="url(#heroBlueGrad)" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="28" cy="71" r="5" fill="url(#heroRedGrad)" stroke="#8E1024" stroke-width="1.2"/>
+            <!-- Right Arm -->
+            <path d="M84 46 L98 58 L92 70" stroke="url(#heroRedGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M98 58 L92 70" stroke="url(#heroBlueGrad)" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="92" cy="71" r="5" fill="url(#heroRedGrad)" stroke="#8E1024" stroke-width="1.2"/>
+
+            <!-- Subtle Spider-Sense Tingle Waves -->
+            <path d="M44 8 Q38 4 34 8" stroke="#F3263E" stroke-width="1.5" stroke-linecap="round" class="spider-sense-arc" stroke-opacity="0.8"/>
+            <path d="M76 8 Q82 4 86 8" stroke="#F3263E" stroke-width="1.5" stroke-linecap="round" class="spider-sense-arc" stroke-opacity="0.8"/>
+          </svg>
+
+          <div class="combat-popup-text" id="playerPopup" style="display: none;"></div>
+        </div>
+
+        <!-- Spider-Sense Status Card (HUD Component) -->
+        <div class="showdown-status-box is-player active-turn" id="playerStatusBox">
+          <div class="hud-card-corner top-left"></div>
+          <div class="hud-card-corner bottom-right"></div>
+
+          <div class="status-box-header">
+            <div class="bot-title-area">
+              <span class="bot-faction-icon">🕷️</span>
+              <span class="bot-name" id="playerName">spider_sense</span>
+              <span class="bot-tag hero">HERO</span>
+            </div>
+            <span class="status-condition-badge alive" id="playerCondition">ALIVE</span>
+          </div>
+
+          <!-- Prominent Health Display -->
+          <div class="hp-section">
+            <div class="hp-headline-row">
+              <span class="hp-label">SUIT INTEGRITY</span>
+              <span class="hp-digital-number" id="playerHpText">5 / 5 (100%)</span>
+            </div>
+            
+            <div class="hp-track">
+              <div class="hp-fill" id="playerHpFill" style="width: 100%;"></div>
+            </div>
+
+            <div class="hp-pips-row" id="playerHpPips">
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+              <div class="hp-pip active"></div>
+            </div>
+          </div>
+
+          <!-- Tactical Equipment / Upgrades Row -->
+          <div class="items-row" id="playerItemsRow">
+            <div class="item-badge" title="Juice (+1 Heal)">
+              <span class="item-icon">🧃</span>
+              <span class="item-name">JUICE</span>
+              <b class="item-count" id="playerJuice">0</b>
+            </div>
+            <div class="item-badge" title="Coffee (Eject Shell)">
+              <span class="item-icon">☕</span>
+              <span class="item-name">COFFEE</span>
+              <b class="item-count" id="playerCoffee">0</b>
+            </div>
+            <div class="item-badge" title="Magnifying Glass (Inspect Shell)">
+              <span class="item-icon">🔍</span>
+              <span class="item-name">MAG</span>
+              <b class="item-count" id="playerMag">0</b>
+            </div>
+            <div class="item-badge" title="Pool Floatie (Turn Skip)">
+              <span class="item-icon">🛟</span>
+              <span class="item-name">FLOAT</span>
+              <b class="item-count" id="playerFloatie">0</b>
+            </div>
+            <div class="item-badge" title="Hand Saw (+1 Damage Boost)">
+              <span class="item-icon">🪚</span>
+              <span class="item-name">SAW</span>
+              <b class="item-count" id="playerSaw">0</b>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- RIGHT: FUTURISTIC COMBAT LOG / EVENT FEED -->
+    <aside class="battle-log-container">
+      
+      <div class="log-header-bar">
+        <div class="log-title">
+          <span class="log-title-icon">⚡</span>
+          <span>COMBAT FEED</span>
+        </div>
+        <div class="log-options">
+          <label>
+            <input type="checkbox" id="autoScrollCheck" checked> AUTO-SCROLL
+          </label>
+        </div>
+      </div>
+
+      <!-- Scrollable Chronological Events Stream -->
+      <div class="battle-log-stream" id="battleLogStream">
+        <!-- Dynamically rendered turn events -->
+      </div>
+
+      <button class="btn-jump-latest" id="btnJumpLatest">⬇ JUMP TO LATEST</button>
+
+    </aside>
+
+  </main>
+
+  <!-- ========================================================================
+       3. BOTTOM PLAYBACK BAR: AAA REPLAY CONSOLE & SCRUBBER
+       ======================================================================== -->
+  <footer class="battle-controls-bar">
+    
+    <div class="playback-buttons">
+      <button class="control-btn" id="btnRestart" title="Restart replay from Turn 1 (Home)">⏮</button>
+      <button class="control-btn" id="btnPrev" title="Previous event (Left Arrow)">◀</button>
+      <button class="play-toggle-btn" id="playToggleBtn" title="Play / Pause Replay (Spacebar)">▶</button>
+      <button class="control-btn" id="btnNext" title="Next event (Right Arrow)">▶</button>
+      <button class="control-btn" id="btnEnd" title="Jump to final outcome (End)">⏭</button>
+    </div>
+
+    <!-- Timeline Scrubber Deck -->
+    <div class="timeline-slider-box">
+      <div class="timeline-info">
+        <div class="timeline-progress-readout">
+          <span class="step-chip">STEP <b id="currentStepNum">1</b> / <b id="totalStepsNum">1</b></span>
+          <span class="round-chip" id="currentRoundText">Round 1</span>
+        </div>
+        <div class="timeline-hotkeys">
+          <span class="hotkey-badge"><kbd>SPACE</kbd> PLAY/PAUSE</span>
+          <span class="hotkey-badge"><kbd>◀ / ▶</kbd> STEP</span>
+          <span class="hotkey-badge"><kbd>HOME / END</kbd> JUMP</span>
+        </div>
+      </div>
+      <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="0" value="0">
+    </div>
+
+    <!-- Playback Speed Pills -->
+    <div class="speed-selector-group">
+      <span class="speed-label">SPEED:</span>
+      <button class="speed-btn" data-speed="0.5">0.5x</button>
+      <button class="speed-btn active" data-speed="1.0">1.0x</button>
+      <button class="speed-btn" data-speed="2.0">2.0x</button>
+      <button class="speed-btn" data-speed="4.0">4.0x</button>
+      <button class="speed-btn" data-speed="8.0">8.0x</button>
+    </div>
+
+  </footer>
+
+  <!-- ========================================================================
+       4. MODALS: REPLAY LIBRARY, LIVE SIMULATION & VICTORY BANNER
+       ======================================================================== -->
+
+  <!-- Modal: Replay Library -->
+  <div class="modal-overlay" id="modalLibrary">
+    <div class="modal-window">
+      <div class="modal-top">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">📁</span>
+          <h2 class="modal-heading">Tournament Replay Archives</h2>
+        </div>
+        <button class="modal-close-btn" id="closeLibraryBtn">&times;</button>
+      </div>
+      <div class="modal-content-area">
+        <p class="modal-description">
+          Select any verified tournament match record to inspect decision streams and Bayesian odds step-by-step:
+        </p>
+        <div class="match-picker-list" id="matchPickerList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Live Simulation Setup -->
+  <div class="modal-overlay" id="modalSim">
+    <div class="modal-window" style="max-width: 480px;">
+      <div class="modal-top">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">⚡</span>
+          <h2 class="modal-heading">Execute Live Simulation</h2>
+        </div>
+        <button class="modal-close-btn" id="closeSimBtn">&times;</button>
+      </div>
+      <div class="modal-content-area">
+        <p class="modal-description">
+          Run an on-demand match pitting <b>spider_sense</b> against baseline bots using the official local engine:
+        </p>
+        <div class="modal-field-group">
+          <label class="modal-field-label">OPPONENTS COMPOSITION:</label>
+          <select id="simPlayersSelect" class="modal-select">
+            <option value="2" selected>1v1: spider_sense vs random_bot</option>
+            <option value="3">1v2: spider_sense vs 2 random_bots</option>
+            <option value="4">1v3: spider_sense vs 3 random_bots</option>
+          </select>
+        </div>
+        <div class="modal-field-group">
+          <label class="modal-field-label">RNG SEED:</label>
+          <input type="number" id="simSeedInput" value="42" class="modal-input">
+        </div>
+        <div class="modal-action-row">
+          <button class="btn btn-hud-glass" onclick="document.getElementById('modalSim').classList.remove('open')">CANCEL</button>
+          <button class="btn btn-hud-red" id="btnSubmitSim">
+            <span id="simLoadingIcon" style="display: none; margin-right: 6px;">⏳</span> START BATTLE
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Victory / Defeat Overlay Banner -->
+  <div class="modal-overlay" id="modalVictory">
+    <div class="modal-window modal-victory-window" style="max-width: 520px;">
+      <div class="modal-top">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">🏆</span>
+          <h2 class="modal-heading">Match Conclusion</h2>
+        </div>
+        <button class="modal-close-btn" id="closeVictoryBtn">&times;</button>
+      </div>
+      <div class="modal-content-area" style="text-align: center;">
+        <div class="showdown-victory-card victory" id="victoryCard">
+          <div class="victory-crest-wrap">
+            <div class="victory-crest-icon" id="victoryTrophyIcon">🕷️</div>
+          </div>
+          <div class="victory-title victory" id="victoryTitle">VICTORY!</div>
+          <div class="victory-sub" id="victorySubtitle">spider_sense won the battle!</div>
+        </div>
+        <div class="victory-telemetry-box" id="victoryStatsDetails">
+          <!-- Populated dynamically -->
+        </div>
+        <button class="btn btn-hud-red btn-full-width" onclick="document.getElementById('modalVictory').classList.remove('open')">
+          REVIEW MATCH REPLAY
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bundled Replay fallback for instant offline viewing -->
+  <script src="sample_match.js"></script>
+  <!-- Application Engine -->
+  <script src="app.js"></script>
+</body>
+</html>
